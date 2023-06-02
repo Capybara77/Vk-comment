@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>vk_comment_bot</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="VkNet" Version="1.74.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="xNetStandard">
+      <HintPath>H:\Andrei\Готовые проекты\xNetStandard.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
