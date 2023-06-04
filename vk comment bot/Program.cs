@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using vk_comment_bot;
 using VkNet;
 using VkNet.Enums.Filters;
@@ -24,30 +25,54 @@ class Program
 
         PostId = JsonConvert.DeserializeObject<List<ModelHistory>>(File.ReadAllText("his.txt")) ?? new List<ModelHistory>();
 
+        WriteLineWithColor($"Чтение файлов завершено. Токинов в системе - {tokens.Length}\r\n" +
+                           $"Ключевых слов - {keywords.Length}\r\n" +
+                           $"Сообщение - {message}\r\n" +
+                           $"Только с вложением - {withAudio}\r\n" +
+                           $"История содержит записей - {PostId.Count}", ConsoleColor.White);
+
         AuthorizeTokens(tokens);
 
         if (InItAudio(audioFile, out Audio audio)) return;
 
+        WriteLineWithColor($"Аудио получено. name - {audio.Title} artist - {audio.Artist}", ConsoleColor.White);
+
         foreach (var vkApi in VkApis)
         {
+            WriteLineWithColor($"Используется токен {vkApi.Account.GetProfileInfoAsync().Result.FirstName}", ConsoleColor.White);
             for (int i = 0; i < 40;)
             {
                 try
                 {
-                    WriteLineWithColor("Делаю поиск", ConsoleColor.Magenta);
-                    Thread.Sleep(30000);
+                    WriteLineWithColor("Делаю поиск через 30 сек", ConsoleColor.Magenta);
+                    Thread.Sleep(3000);
                     var searchResult = GetNewsFeed.GetNews(string.Join(" OR ", keywords), 30, StartTime, tokens[GetHistoryCounter % tokens.Length]);
+                    JArray array = searchResult.response.items;
+                    WriteLineWithColor($"Поиск завершен, постов - {array.Count}", ConsoleColor.White);
+                    if (array.Count == 0)
+                    {
+                        WriteLineWithColor(
+                            $"Поиск не выдал результата. Либо плохой запрос, либо ВК заблокировало функцию поиска для акка (появится снова через часов 5)\r\n" +
+                            $"Желательно выключить бота, либо убрать невалидный токен", ConsoleColor.Red);
+                    }
+
 
                     foreach (var post in searchResult?.response?.items)
                     {
                         ModelHistory history = GetModelHistory(post);
                         // проверка на историю комментов
                         if (PostId != null && PostId.Any(modelHistory => modelHistory == history))
+                        {
+                            WriteLineWithColor($"Пост уже был обработан", ConsoleColor.Yellow);
                             continue;
+                        }
 
                         // проверка на аудио
                         if (withAudio && !HaveAudioAttachment(post))
+                        {
+                            WriteLineWithColor($"В посте нет вложения, пропуск. Если это сообщение появляется слишком часто, можно сделать withaudio.txt = 0", ConsoleColor.White);
                             continue;
+                        }
 
                         PostId?.Add(history);
                         File.WriteAllText("his.txt", JsonConvert.SerializeObject(PostId));
