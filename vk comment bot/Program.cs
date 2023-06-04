@@ -45,7 +45,7 @@ class Program
                 try
                 {
                     WriteLineWithColor("Делаю поиск через 30 сек", ConsoleColor.Magenta);
-                    Thread.Sleep(3000);
+                    Thread.Sleep(30000);
                     var searchResult = GetNewsFeed.GetNews(string.Join(" OR ", keywords), 30, StartTime, tokens[GetHistoryCounter % tokens.Length]);
                     JArray array = searchResult.response.items;
                     WriteLineWithColor($"Поиск завершен, постов - {array.Count}", ConsoleColor.White);
